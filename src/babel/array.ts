@@ -1,12 +1,14 @@
-import defaultExpressionParser from "./expression";
-import { Parser } from "./types";
+import { parseAny } from "./any";
+import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
 import t from "@babel/types";
 
-export default function defaultArrayParser<I>(itemSchema?: Parser<I>) {
+export default function parseArray<C extends ZastContext, I>(
+  context: C,
+  options?: { itemsSchema?: Parser<I> }
+): Parser<I[]> {
   return {
-    name: "array",
-    parse: function arrayParser(node: t.Node) {
+    parse(node) {
       if (!t.isArrayExpression(node)) {
         throw new ParseError(node);
       }
@@ -25,9 +27,9 @@ export default function defaultArrayParser<I>(itemSchema?: Parser<I>) {
       for (const item of node.elements) {
         if (item && t.isExpression(item)) {
           out.push(
-            itemSchema
-              ? itemSchema.parse(item)
-              : (defaultExpressionParser().parse(item) as any)
+            options?.itemsSchema
+              ? options.itemsSchema.parse(item)
+              : parseAny(context).parse(item)
           );
         }
       }

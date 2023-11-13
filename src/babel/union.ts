@@ -1,14 +1,19 @@
-import { Parser } from "./types";
+import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
 import t from "@babel/types";
 
-export default function defaultUnionParser<I extends Array<unknown>>(
-  schemas: [...{ [key in keyof I]: Parser<I[key]> }]
+export default function defaultUnionParser<
+  C extends ZastContext,
+  I extends Array<unknown>
+>(
+  context: C,
+  options: {
+    membersSchema: [...{ [key in keyof I]: Parser<I[key]> }];
+  }
 ): Parser<I[number]> {
   return {
-    name: "or",
-    parse: function orParser(node: t.Node) {
-      for (const schema of schemas) {
+    parse: function orParser(node) {
+      for (const schema of options.membersSchema) {
         try {
           const value = schema.parse(node);
           return value;

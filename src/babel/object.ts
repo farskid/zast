@@ -1,16 +1,21 @@
-import defaultExpressionParser from "./expression";
-import { Parser } from "./types";
+import { parseAny } from "./any";
+import { Parser, ZastContext } from "./types";
 import { ParseError, getObjectPropertyKey } from "./utils";
 import t from "@babel/types";
 
-export default function defaultObjectParser<
+export function parseObject<
+  C extends ZastContext,
   I extends Record<string, unknown>
->(objSchema?: {
-  [key in keyof I]: Parser<I[key]>;
-}): Parser<I> {
+>(
+  context: C,
+  options?: {
+    objSchema?: {
+      [key in keyof I]: Parser<I[key]>;
+    };
+  }
+): Parser<I> {
   return {
-    name: "object",
-    parse: function objectParser(node: t.Node) {
+    parse(node) {
       if (!t.isObjectExpression(node)) {
         throw new ParseError(node);
       }
@@ -31,10 +36,11 @@ export default function defaultObjectParser<
 
       for (const prop of properties) {
         const key = getObjectPropertyKey(prop);
-        const schema = objSchema ? objSchema[key] : defaultExpressionParser();
-        if (objSchema ? objSchema.hasOwnProperty(key) : true) {
+        const schema = options?.objSchema
+          ? options.objSchema[key]
+          : parseAny(context);
+        if (options?.objSchema ? options.objSchema.hasOwnProperty(key) : true) {
           foundKeys.add(key);
-          console.log(key, schema);
           try {
             // @ts-expect-error todo
             out[key] = schema.parse(prop.value);
@@ -57,8 +63,8 @@ export default function defaultObjectParser<
         }
       }
 
-      if (objSchema) {
-        const schemaKeys = Object.keys(objSchema);
+      if (options?.objSchema) {
+        const schemaKeys = Object.keys(options.objSchema);
         for (const key of schemaKeys) {
           if (!foundKeys.has(key)) {
             throw new ParseError(node, `Missing key "${key}"`);

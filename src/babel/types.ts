@@ -1,6 +1,6 @@
 import t from "@babel/types";
 
+export type ZastContext = { fileContent: string; [key: string]: unknown };
 export type Parser<Value> = {
-  name: string;
   parse(node: t.Node): Value;
 };

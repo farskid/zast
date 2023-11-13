@@ -1,18 +1,20 @@
 import t from "@babel/types";
 import { ParseError } from "./utils";
-import { Parser } from "./types";
+import { Parser, ZastContext } from "./types";
 
-export default function defaultIdentifierParser(name?: string): Parser<string> {
+export function parseIdentifier<C extends ZastContext>(
+  context: C,
+  options?: { name?: string }
+): Parser<string> {
   return {
-    name: "identifier",
-    parse: function identifierParser(node: t.Node) {
+    parse(node) {
       if (!t.isIdentifier(node)) {
         throw new ParseError(
           node,
           "type mismatch, expected identifier but received"
         );
       }
-      if (name && node.name !== name) {
+      if (options?.name && node.name !== options.name) {
         throw new ParseError(node, "identifier name mismatch");
       }
       return node.name;

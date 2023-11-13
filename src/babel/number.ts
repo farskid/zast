@@ -1,11 +1,13 @@
 import t from "@babel/types";
 import { ParseError } from "./utils";
-import { Parser } from "./types";
+import { Parser, ZastContext } from "./types";
 
-export default function defaultNumberParser(value?: number): Parser<number> {
+export function parseNumber<C extends ZastContext>(
+  context: C,
+  value?: number
+): Parser<number> {
   return {
-    name: "number",
-    parse: function numberParser(node: t.Node) {
+    parse(node) {
       if (!t.isNumericLiteral(node)) {
         throw new ParseError(
           node,

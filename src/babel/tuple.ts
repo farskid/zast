@@ -1,13 +1,17 @@
-import { Parser } from "./types";
+import { parseAny } from "./any";
+import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
 import t from "@babel/types";
 
-export default function defaultTupleParser<I extends Array<unknown>>(
-  schemas: [...{ [key in keyof I]: Parser<I[key]> }]
+export default function parseTuple<
+  C extends ZastContext,
+  I extends Array<unknown>
+>(
+  context: C,
+  options?: { itemsSchema?: [...{ [key in keyof I]: Parser<I[key]> }] }
 ): Parser<I> {
   return {
-    name: "array",
-    parse: function tupleParser(node: t.Node) {
+    parse(node) {
       if (!t.isArrayExpression(node)) {
         throw new ParseError(node);
       }
@@ -24,7 +28,11 @@ export default function defaultTupleParser<I extends Array<unknown>>(
       for (let i = 0; i < node.elements.length; i++) {
         const item = node.elements[i];
         if (item) {
-          out.push(schemas[i].parse(item));
+          out.push(
+            options?.itemsSchema
+              ? options.itemsSchema[i].parse(item)
+              : parseAny(context).parse(item)
+          );
         }
       }
 

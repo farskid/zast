@@ -1,14 +1,15 @@
 import t from "@babel/types";
-import { Parser } from "./types";
+import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
 
-export default function defaultFunctionParser(options?: {
-  code?: string; // TODO: move to the parser context
-  name?: string;
-}): Parser<string | undefined> {
+export default function parseFunction<C extends ZastContext>(
+  context: C,
+  options?: {
+    name?: string;
+  }
+): Parser<string | undefined> {
   return {
-    name: "function",
-    parse: function functionParser(node: t.Node) {
+    parse(node) {
       if (!t.isFunctionExpression(node) && !t.isArrowFunctionExpression(node)) {
         throw new ParseError(
           node,
@@ -27,8 +28,7 @@ export default function defaultFunctionParser(options?: {
         }
       }
 
-      // If no code is provided, schema just passes
-      return options?.code?.slice(node.start!, node.end!);
+      return context.fileContent.slice(node.start!, node.end!);
     },
   };
 }

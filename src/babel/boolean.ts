@@ -1,11 +1,13 @@
 import t from "@babel/types";
 import { ParseError } from "./utils";
-import { Parser } from "./types";
+import { Parser, ZastContext } from "./types";
 
-export default function defaultBooleanParser(value?: boolean): Parser<boolean> {
+export function parseBoolean<C extends ZastContext>(
+  context: C,
+  value?: boolean
+): Parser<boolean> {
   return {
-    name: "boolean",
-    parse: function booleanParser(node: t.Node) {
+    parse(node) {
       if (!t.isBooleanLiteral(node)) {
         throw new ParseError(
           node,

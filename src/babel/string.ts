@@ -2,10 +2,9 @@ import t from "@babel/types";
 import { ParseError } from "./utils";
 import { Parser } from "./types";
 
-export default function defaultStringParser(value?: string): Parser<string> {
+export function parseString<C>(context: C, value?: string): Parser<string> {
   return {
-    name: "string",
-    parse: function stringParser(node: t.Node) {
+    parse(node) {
       if (!t.isStringLiteral(node)) {
         throw new ParseError(
           node,
