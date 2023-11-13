@@ -1,51 +1,52 @@
 import { expectTypeOf } from "vitest";
-import { az } from "../babel";
+import { z } from "../babel";
 
-describe("az.", () => {
-  it("az.string() should infer a string output", () => {
-    expectTypeOf(az.string().parse).returns.toBeString();
+describe("z.", () => {
+  it("z.string() should infer a string output", () => {
+    expectTypeOf(z.string().parse).returns.toBeString();
   });
-  it("az.string(string) should infer a string output", () => {
-    expectTypeOf(az.string.bind(null, "john")().parse).returns.toBeString();
+  it("z.string(string) should infer a string output", () => {
+    expectTypeOf(z.string.bind(null, "john")().parse).returns.toBeString();
   });
-  it("az.number() should infer a number ouput", () => {
-    expectTypeOf(az.number().parse).returns.toBeNumber();
+  it("z.number() should infer a number ouput", () => {
+    expectTypeOf(z.number().parse).returns.toBeNumber();
   });
-  it("az.number(number) should infer a number output", () => {
-    expectTypeOf(az.number.bind(null, 2)().parse).returns.toBeNumber();
+  it("z.number(number) should infer a number output", () => {
+    expectTypeOf(z.number.bind(null, 2)().parse).returns.toBeNumber();
   });
-  it("az.boolean() should infer a boolean ouput", () => {
-    expectTypeOf(az.boolean().parse).returns.toBeBoolean();
+  it("z.boolean() should infer a boolean ouput", () => {
+    expectTypeOf(z.boolean().parse).returns.toBeBoolean();
   });
-  it("az.boolean(boolean) should infer a boolean output", () => {
-    expectTypeOf(az.boolean.bind(null, false)().parse).returns.toBeBoolean();
+  it("z.boolean(boolean) should infer a boolean output", () => {
+    expectTypeOf(z.boolean.bind(null, false)().parse).returns.toBeBoolean();
   });
-  it("az.identifier() should infer an identifier output", () => {
-    expectTypeOf(az.identifier().parse).returns.toBeString();
+  it("z.identifier() should infer an identifier output", () => {
+    expectTypeOf(z.identifier().parse).returns.toBeString();
   });
-  it("az.identifier(identifier) should infer an identifier output", () => {
-    expectTypeOf(az.identifier.bind(null, "john")().parse).returns.toBeString();
+  it("z.identifier(identifier) should infer an identifier output", () => {
+    expectTypeOf(z.identifier.bind(null, "john")().parse).returns.toBeString();
   });
-  it("az.function() should infer either string or undefined as the output", () => {
-    expectTypeOf(az.function().parse).returns.toEqualTypeOf<string | undefined>;
+  it("z.function() should infer either string or undefined as the output", () => {
+    expectTypeOf(z.function().parse).returns.toEqualTypeOf<string | undefined>;
   });
-  it('az.array(arr) should infer array item"s type', () => {
-    expectTypeOf(az.array(az.string()).parse).returns.toEqualTypeOf<string[]>;
-    expectTypeOf(az.array(az.number()).parse).returns.toEqualTypeOf<number[]>;
+  it('z.array(arr) should infer array item"s type', () => {
+    expectTypeOf(z.array(z.string()).parse).returns.toEqualTypeOf<string[]>;
+    expectTypeOf(z.array(z.number()).parse).returns.toEqualTypeOf<number[]>;
   });
-  it('az.tuple(tuple) should infer tuple item"s type', () => {
+  it('z.tuple(tuple) should infer tuple item"s type', () => {
     // Technically, (string | number)[] will also pass this test because it's assignable to [string, number] but we want tuple to have accurate output type
-    expectTypeOf(az.tuple([az.string(), az.number()]).parse).returns
-      .toEqualTypeOf<[string, number]>;
+    expectTypeOf(z.tuple([z.string(), z.number()]).parse).returns.toEqualTypeOf<
+      [string, number]
+    >;
   });
-  it("az.object(obj) should infer object type", () => {
+  it("z.object(obj) should infer object type", () => {
     expectTypeOf(
-      az.object({
-        str: az.string(),
-        num: az.number(),
-        bool: az.boolean(),
-        func: az.function(),
-        arr: az.array(az.string()),
+      z.object({
+        str: z.string(),
+        num: z.number(),
+        bool: z.boolean(),
+        func: z.function(),
+        arr: z.array(z.string()),
       }).parse
     ).returns.toEqualTypeOf<{
       str: string;
@@ -55,16 +56,16 @@ describe("az.", () => {
       arr: string[];
     }>;
   });
-  it("az.or(...schemas) should infer a union of provided schemas", () => {
+  it("z.or(...schemas) should infer a union of provided schemas", () => {
     // expectTypeOf(
-    //   az.or([
-    //     az.string(),
-    //     az.number(),
-    //     az.boolean(),
-    //     // az.function(),
-    //     az.array(az.number()),
-    //     az.object({
-    //       id: az.string(),
+    //   z.or([
+    //     z.string(),
+    //     z.number(),
+    //     z.boolean(),
+    //     // z.function(),
+    //     z.array(z.number()),
+    //     z.object({
+    //       id: z.string(),
     //     }),
     //   ]).parse
     // ).returns.toEqualTypeOf<string>;

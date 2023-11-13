@@ -8,7 +8,7 @@ import defaultArrayParser from "./babel/array";
 import defaultTupleParser from "./babel/tuple";
 import defaultUnionParser from "./babel/union";
 
-export const az = {
+export const z = {
   string: defaultStringParser,
   number: defaultNumberParser,
   boolean: defaultBooleanParser,

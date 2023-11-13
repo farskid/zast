@@ -1,10 +1,10 @@
 import babel from "@babel/parser";
 import traverse from "@babel/traverse";
-import { az } from "../babel";
+import { z } from "../babel";
 import t from "@babel/types";
 
 describe("babel", () => {
-  describe("az.string()", () => {
+  describe("z.string()", () => {
     it("should pass for any string", () => {
       let node: t.Node | undefined;
       const file = babel.parse("const data = {name: 'john'}");
@@ -13,7 +13,7 @@ describe("babel", () => {
           node = path.node;
         },
       });
-      expect(az.string().parse(node!)).toBe("john");
+      expect(z.string().parse(node!)).toBe("john");
     });
     it("should throw if type is not string", () => {
       let node: t.Node | undefined;
@@ -24,7 +24,7 @@ describe("babel", () => {
         },
       });
       // toThrow expects a function
-      expect(az.string().parse.bind(null, node!)).toThrow();
+      expect(z.string().parse.bind(null, node!)).toThrow();
     });
     it("should pass for a string with specific value", () => {
       let node: t.Node | undefined;
@@ -34,7 +34,7 @@ describe("babel", () => {
           node = path.node;
         },
       });
-      expect(az.string("andy").parse(node!)).toBe("andy");
+      expect(z.string("andy").parse(node!)).toBe("andy");
     });
     it("should throw for a string with specific value if string contains a different value", () => {
       let node: t.Node | undefined;
@@ -45,10 +45,10 @@ describe("babel", () => {
         },
       });
       // toThrow expects a function
-      expect(az.string("john").parse.bind(null, node!)).toThrow();
+      expect(z.string("john").parse.bind(null, node!)).toThrow();
     });
   });
-  describe("az.number()", () => {
+  describe("z.number()", () => {
     it("should pass for any number", () => {
       let node: t.Node | undefined;
       const file = babel.parse("const data = {age: 22}");
@@ -57,7 +57,7 @@ describe("babel", () => {
           node = path.node;
         },
       });
-      expect(az.number().parse(node!)).toBe(22);
+      expect(z.number().parse(node!)).toBe(22);
     });
     it("should throw if type is not number", () => {
       let node: t.Node | undefined;
@@ -68,7 +68,7 @@ describe("babel", () => {
         },
       });
       // toThrow expects a function
-      expect(az.number().parse.bind(null, node!)).toThrow();
+      expect(z.number().parse.bind(null, node!)).toThrow();
     });
     it("should pass for a number with specific value", () => {
       let node: t.Node | undefined;
@@ -78,7 +78,7 @@ describe("babel", () => {
           node = path.node;
         },
       });
-      expect(az.number(30).parse(node!)).toBe(30);
+      expect(z.number(30).parse(node!)).toBe(30);
     });
     it("should throw for a number with specific value if number contains a different value", () => {
       let node: t.Node | undefined;
@@ -89,9 +89,9 @@ describe("babel", () => {
         },
       });
       // toThrow expects a function
-      expect(az.number(29).parse.bind(null, node!)).toThrow();
+      expect(z.number(29).parse.bind(null, node!)).toThrow();
     });
-    describe("az.boolean()", () => {
+    describe("z.boolean()", () => {
       it("should pass for any boolean", () => {
         let node: t.Node | undefined;
         const file = babel.parse("const data = {isAdmin: true}");
@@ -100,7 +100,7 @@ describe("babel", () => {
             node = path.node;
           },
         });
-        expect(az.boolean().parse(node!)).toBe(true);
+        expect(z.boolean().parse(node!)).toBe(true);
       });
       it("should throw if type is not boolean", () => {
         let node: t.Node | undefined;
@@ -111,7 +111,7 @@ describe("babel", () => {
           },
         });
         // toThrow expects a function
-        expect(az.boolean().parse.bind(null, node!)).toThrow();
+        expect(z.boolean().parse.bind(null, node!)).toThrow();
       });
       it("should pass for a boolean with specific value", () => {
         let node: t.Node | undefined;
@@ -121,7 +121,7 @@ describe("babel", () => {
             node = path.node;
           },
         });
-        expect(az.boolean(false).parse(node!)).toBe(false);
+        expect(z.boolean(false).parse(node!)).toBe(false);
       });
       it("should throw for a boolean with specific value if boolean contains a different value", () => {
         let node: t.Node | undefined;
@@ -132,12 +132,12 @@ describe("babel", () => {
           },
         });
         // toThrow expects a function
-        expect(az.boolean(true).parse.bind(null, node!)).toThrow();
+        expect(z.boolean(true).parse.bind(null, node!)).toThrow();
       });
     });
   });
-  describe.todo("az.identifier()");
-  describe("az.function()", () => {
+  describe.todo("z.identifier()");
+  describe("z.function()", () => {
     it("should pass for a sync function", () => {
       let node: t.Node | undefined;
       const file = babel.parse("const user = {getSession: function() {}}");
@@ -147,7 +147,7 @@ describe("babel", () => {
         },
       });
 
-      expect(az.function().parse(node!)).toBe(undefined);
+      expect(z.function().parse(node!)).toBe(undefined);
     });
     it("should pass for an async function", () => {
       let node: t.Node | undefined;
@@ -160,7 +160,7 @@ describe("babel", () => {
         },
       });
 
-      expect(az.function().parse(node!)).toBe(undefined);
+      expect(z.function().parse(node!)).toBe(undefined);
     });
     it("should pass with function code if code is passed on", () => {
       let node: t.Node | undefined;
@@ -173,12 +173,12 @@ describe("babel", () => {
         },
       });
 
-      expect(az.function({ code: fileContent }).parse(node!)).toBe(
+      expect(z.function({ code: fileContent }).parse(node!)).toBe(
         "function() {return Promise.resolve(2)}"
       );
     });
   });
-  describe("az.array()", () => {
+  describe("z.array()", () => {
     it("should parse single type of elemens in array", () => {
       let node: t.Node | undefined;
       const fileContent = "const arr = [1,2,3]";
@@ -189,8 +189,8 @@ describe("babel", () => {
         },
       });
 
-      expect(az.array(az.number()).parse(node!)).toEqual([1, 2, 3]);
-      expect(az.array(az.string()).parse.bind(null, node!)).toThrow();
+      expect(z.array(z.number()).parse(node!)).toEqual([1, 2, 3]);
+      expect(z.array(z.string()).parse.bind(null, node!)).toThrow();
     });
     it("should parse multiple types of elemens in array", () => {
       let node: t.Node | undefined;
@@ -203,10 +203,10 @@ describe("babel", () => {
       });
 
       expect(
-        az.array(az.or([az.number(), az.string(), az.boolean()])).parse(node!)
+        z.array(z.or([z.number(), z.string(), z.boolean()])).parse(node!)
       ).toEqual([1, "a", true]);
       expect(
-        az.array(az.or([az.number(), az.boolean()])).parse.bind(null, node!)
+        z.array(z.or([z.number(), z.boolean()])).parse.bind(null, node!)
       ).toThrow();
     });
     it("should parse any array", () => {
@@ -219,7 +219,7 @@ describe("babel", () => {
         },
       });
 
-      expect(az.array().parse(node!)).toEqual([1, "a", true]);
+      expect(z.array().parse(node!)).toEqual([1, "a", true]);
     });
     // Question for API design, how should this behave?
     it.skip("should parse nested arrays", () => {
@@ -235,11 +235,11 @@ describe("babel", () => {
       });
 
       expect(
-        az.array(az.or([az.number(), az.array(az.number())])).parse(node!)
+        z.array(z.or([z.number(), z.array(z.number())])).parse(node!)
       ).toEqual([1, [2, [3], [4, [5]]]]);
     });
   });
-  describe("az.tuple()", () => {
+  describe("z.tuple()", () => {
     it("should parse tuples", () => {
       let node: t.Node | undefined;
       const fileContent = "const arr = ['John Doe', 32, true]";
@@ -251,12 +251,12 @@ describe("babel", () => {
       });
 
       expect(
-        az.tuple([az.string(), az.number(), az.boolean()]).parse(node!)
+        z.tuple([z.string(), z.number(), z.boolean()]).parse(node!)
       ).toEqual(["John Doe", 32, true]);
-      expect(az.tuple([az.string()]).parse.bind(null, node!)).toThrow();
+      expect(z.tuple([z.string()]).parse.bind(null, node!)).toThrow();
     });
   });
-  describe("az.object()", () => {
+  describe("z.object()", () => {
     it("should pass for an exact object", () => {
       let node: t.Node | undefined;
       const fileContent =
@@ -269,13 +269,13 @@ describe("babel", () => {
       });
 
       expect(
-        az
+        z
           .object({
-            str: az.string(),
-            num: az.number(),
-            bool: az.boolean(),
-            test: az.function({ code: fileContent }),
-            arr: az.array(az.number()),
+            str: z.string(),
+            num: z.number(),
+            bool: z.boolean(),
+            test: z.function({ code: fileContent }),
+            arr: z.array(z.number()),
           })
           .parse(node!)
       ).toEqual({
@@ -307,12 +307,12 @@ describe("babel", () => {
       });
 
       expect(
-        az
+        z
           .object({
-            a: az.object({
-              b: az.string(),
-              c: az.object({
-                d: az.number(),
+            a: z.object({
+              b: z.string(),
+              c: z.object({
+                d: z.number(),
               }),
             }),
           })
@@ -342,7 +342,7 @@ describe("babel", () => {
         },
       });
 
-      expect(az.object().parse(node!)).toEqual({
+      expect(z.object().parse(node!)).toEqual({
         str: "str",
         num: 2,
         bool: false,
@@ -351,7 +351,7 @@ describe("babel", () => {
       });
     });
   });
-  describe("az.or()", () => {
+  describe("z.or()", () => {
     it("should return a union type of parsed values from provided schemas", () => {
       let node: t.Node | undefined;
       const fileContent = `const value = [1,'a',true,[1,2,3],{id: 'ss'}]`;
@@ -366,15 +366,9 @@ describe("babel", () => {
       });
 
       expect(
-        az
+        z
           .array(
-            az.or([
-              az.string(),
-              az.number(),
-              az.boolean(),
-              az.array(),
-              az.object(),
-            ])
+            z.or([z.string(), z.number(), z.boolean(), z.array(), z.object()])
           )
           .parse(node!)
       ).toEqual([1, "a", true, [1, 2, 3], { id: "ss" }]);

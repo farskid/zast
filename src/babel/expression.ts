@@ -1,6 +1,6 @@
 import t from "@babel/types";
 import { ParseError } from "./utils";
-import { az } from "../babel";
+import { z } from "../babel";
 
 export default function defaultExpressionParser() {
   return {
@@ -12,14 +12,14 @@ export default function defaultExpressionParser() {
           "type mismatch, expected expression but received"
         );
       }
-      return az
+      return z
         .or([
-          az.string(),
-          az.number(),
-          az.boolean(),
-          az.array(),
-          az.function(),
-          az.object(),
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.array(),
+          z.function(),
+          z.object(),
         ])
         .parse(node);
     },
