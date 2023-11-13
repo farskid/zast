@@ -1,11 +1,17 @@
 {
-  "name": "astzod",
-  "version": "1.0.0",
+  "name": "zast",
+  "description": "Zod of AST parsing that works with both Babel and TypeScript AST",
+  "version": "0.0.1",
   "license": "MIT",
+  "author": {
+    "email": "farskid@gmail.com",
+    "name": "Farzad Yousefzadeh",
+    "url": "https://farzadyz.com"
+  },
   "type": "module",
   "scripts": {
-    "test-types": "vitest --typecheck.only",
-    "test": "vitest"
+    "test-types": "vitest run --typecheck.only",
+    "test": "vitest run"
   },
   "exports": "./index.ts",
   "engines": {
