@@ -1,0 +1,24 @@
+{
+  "name": "astzod",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test-types": "vitest --typecheck.only",
+    "test": "vitest"
+  },
+  "exports": "./index.ts",
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "@babel/types": "^7.23.3"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.23.3",
+    "@babel/traverse": "^7.23.3",
+    "@types/babel__traverse": "^7.20.4",
+    "typescript": "^5.2.2",
+    "vitest": "^1.0.0-beta.4"
+  }
+}
