@@ -1,4 +1,4 @@
-# AstZod: Zod of AST parsing
+# Zast: Zod of AST parsing
 
 Parses an AST node against a schema and returns the parsed value if schema parsing passes successfully, otherwise throws an error.
 
