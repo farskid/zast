@@ -11,7 +11,6 @@ import parseTuple from "./tuple";
 import { Parser, ZastContext } from "./types";
 import defaultUnionParser from "./union";
 
-type ReturnTypeInferer<T> = T extends (...args: any[]) => infer U ? U : never;
 export class Zast<
   Context extends ZastContext
   // CustomParsers extends Record<string, Parser<unknown>["parse"]>
