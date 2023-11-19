@@ -11,24 +11,13 @@ import parseTuple from "./tuple";
 import { Parser, ZastContext } from "./types";
 import defaultUnionParser from "./union";
 
-export class Zast<
-  Context extends ZastContext
-  // CustomParsers extends Record<string, Parser<unknown>["parse"]>
-> {
+export class Zast<Context extends ZastContext = ZastContext> {
   private context: Context;
-  constructor(
-    context: Context
-    // customParsers?: CustomParsers
-  ) {
+  constructor(context: Context) {
     this.context = context;
   }
 
-  custom<
-    TName extends string,
-    TArgs extends unknown[],
-    TVal
-    // TBody extends (ctx: Context, node: Node, ...args: unknown[]) => unknown
-  >(
+  custom<TName extends string, TArgs extends unknown[], TVal>(
     name: TName,
     body: (
       ctx: Context,

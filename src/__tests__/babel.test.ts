@@ -387,7 +387,7 @@ describe("babel defaults", () => {
 
 describe("babel custom parser", () => {
   it("should allow creating custom parsers", () => {
-    const z: Zast<{ fileContent: string }> = new Zast({
+    const z: Zast = new Zast({
       fileContent: 'const longStr = "pretend very long str"',
     });
     const file = babel.parse('const longStr = "pretend very long str"');
@@ -412,7 +412,7 @@ describe("babel custom parser", () => {
   });
 
   it("should allow creating custom parsers", () => {
-    const z: Zast<{ fileContent: string }> = new Zast({
+    const z: Zast = new Zast({
       fileContent: 'const longStr = "pretend very long str"',
     });
     const file = babel.parse('const longStr = "pretend very long str"');
