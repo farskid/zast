@@ -5,6 +5,8 @@ import { parseString } from "./string";
 import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
 import parseArray from "./array";
+import { parseObject } from "./object";
+import parseFunction from "./function";
 
 export function parseAny<C extends ZastContext>(context: C): Parser<any> {
   return {
@@ -27,9 +29,12 @@ export function parseAny<C extends ZastContext>(context: C): Parser<any> {
       if (t.isArrayExpression(node)) {
         return parseArray(context).parse(node);
       }
-      //   if (t.isObjectExpression(node)) {
-      //     return parseObject(context).parse(node);
-      //   }
+      if (t.isObjectExpression(node)) {
+        return parseObject(context).parse(node);
+      }
+      if (t.isFunctionExpression(node) || t.isArrowFunctionExpression(node)) {
+        return parseFunction(context).parse(node);
+      }
     },
   };
 }

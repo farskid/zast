@@ -1,3 +1,4 @@
+import { Node } from "@babel/types";
 import { parseAny } from "./any";
 import parseArray from "./array";
 import { parseBoolean } from "./boolean";
@@ -10,10 +11,35 @@ import parseTuple from "./tuple";
 import { Parser, ZastContext } from "./types";
 import defaultUnionParser from "./union";
 
-export class Zast<C extends ZastContext> {
-  private context: C;
-  constructor(context: C) {
+type ReturnTypeInferer<T> = T extends (...args: any[]) => infer U ? U : never;
+export class Zast<
+  Context extends ZastContext
+  // CustomParsers extends Record<string, Parser<unknown>["parse"]>
+> {
+  private context: Context;
+  constructor(
+    context: Context
+    // customParsers?: CustomParsers
+  ) {
     this.context = context;
+  }
+
+  custom<
+    TName extends string,
+    TArgs,
+    TVal
+    // TBody extends (ctx: Context, node: Node, ...args: unknown[]) => unknown
+  >(
+    name: TName,
+    body: (ctx: Context, node: Node, ...args: TArgs[]) => TVal
+  ): asserts this is { [K in TName]: (...args: TArgs[]) => Parser<TVal> } {
+    const ctx = this.context;
+
+    (this as any)[name] = (...args: TArgs[]): Parser<TVal> => ({
+      parse(node) {
+        return body(ctx, node, ...args);
+      },
+    });
   }
 
   any() {

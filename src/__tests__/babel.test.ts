@@ -3,6 +3,7 @@ import traverse from "@babel/traverse";
 import t from "@babel/types";
 import { Zast } from "../babel/zast";
 import { getTestBabelInstance } from "../testUtils";
+import { ParseError } from "../babel/utils";
 
 describe("babel defaults", () => {
   describe("z.string()", () => {
@@ -106,9 +107,7 @@ describe("babel defaults", () => {
         expect(z.boolean().parse(node!)).toBe(true);
       });
       it("should throw if type is not boolean", () => {
-        const { z, file } = getTestBabelInstance(
-          "const data = {isAdmin: true}"
-        );
+        const { z, file } = getTestBabelInstance("const data = {isAdmin: 20}");
         let node: t.Node | undefined;
         traverse(file, {
           BooleanLiteral(path) {
@@ -146,7 +145,7 @@ describe("babel defaults", () => {
     });
   });
   describe.todo("z.identifier()");
-  describe.only("z.function()", () => {
+  describe("z.function()", () => {
     it("should pass for a sync function", () => {
       let node: t.Node | undefined;
       const { z, file } = getTestBabelInstance(
@@ -158,7 +157,7 @@ describe("babel defaults", () => {
         },
       });
 
-      expect(z.function().parse(node!)).toBe(undefined);
+      expect(z.function().parse(node!)).toBe("function() {}");
     });
     it("should pass for an async function", () => {
       let node: t.Node | undefined;
@@ -171,7 +170,7 @@ describe("babel defaults", () => {
         },
       });
 
-      expect(z.function().parse(node!)).toBe(undefined);
+      expect(z.function().parse(node!)).toBe("async function() {}");
     });
     it("should pass with function code if code is passed on", () => {
       let node: t.Node | undefined;
@@ -184,7 +183,9 @@ describe("babel defaults", () => {
         },
       });
 
-      expect(z.function().parse(node!)).toMatchInlineSnapshot(`"function() {return Promise.resolve(2)}"`);
+      expect(z.function().parse(node!)).toMatchInlineSnapshot(
+        `"function() {return Promise.resolve(2)}"`
+      );
     });
   });
   describe("z.array()", () => {
@@ -381,5 +382,33 @@ describe("babel defaults", () => {
           .parse(node!)
       ).toEqual([1, "a", true, [1, 2, 3], { id: "ss" }]);
     });
+  });
+});
+
+describe("babel custom parser", () => {
+  it.only("should allow creating custom parsers", () => {
+    const z: Zast<{ fileContent: string }> = new Zast({
+      fileContent: 'const longStr = "pretend very long str"',
+    });
+    const file = babel.parse('const longStr = "pretend very long str"');
+
+    z.custom("minLenString", (ctx, node, len: number = 10) => {
+      if (t.isStringLiteral(node) && node.value.length > len) {
+        return node.value;
+      }
+      throw new ParseError(node, `string is less than ${len} characters long`);
+    });
+
+    let node: t.Node | undefined;
+    traverse(file, {
+      StringLiteral(path) {
+        // We only want the root object
+        if (!node!) {
+          node = path.node;
+        }
+      },
+    });
+
+    expect(z.minLenString(200).parse(node!)).toEqual("pretend very long str");
   });
 });
