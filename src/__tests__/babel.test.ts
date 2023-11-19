@@ -386,7 +386,7 @@ describe("babel defaults", () => {
 });
 
 describe("babel custom parser", () => {
-  it.only("should allow creating custom parsers", () => {
+  it("should allow creating custom parsers", () => {
     const z: Zast<{ fileContent: string }> = new Zast({
       fileContent: 'const longStr = "pretend very long str"',
     });
@@ -402,13 +402,59 @@ describe("babel custom parser", () => {
     let node: t.Node | undefined;
     traverse(file, {
       StringLiteral(path) {
-        // We only want the root object
         if (!node!) {
           node = path.node;
         }
       },
     });
 
-    expect(z.minLenString(200).parse(node!)).toEqual("pretend very long str");
+    expect(z.minLenString(15).parse(node!)).toEqual("pretend very long str");
+  });
+
+  it("should allow creating custom parsers", () => {
+    const z: Zast<{ fileContent: string }> = new Zast({
+      fileContent: 'const longStr = "pretend very long str"',
+    });
+    const file = babel.parse('const longStr = "pretend very long str"');
+
+    z.custom(
+      "inRangeString",
+      (
+        ctx,
+        node,
+        min: number = 0,
+        max: number = 50,
+        inclusive: boolean = false
+      ) => {
+        if (
+          t.isStringLiteral(node) &&
+          (inclusive ? node.value.length >= min : node.value.length > min) &&
+          (inclusive ? node.value.length <= max : node.value.length < max)
+        ) {
+          return node.value;
+        }
+        throw new ParseError(
+          node,
+          `string does not have a length between ${min} and ${max}, ${
+            inclusive ? "inclusive" : "non-inclusive"
+          }`
+        );
+      }
+    );
+
+    let node: t.Node | undefined;
+    traverse(file, {
+      StringLiteral(path) {
+        if (!node!) {
+          node = path.node;
+        }
+      },
+    });
+
+    expect(z.inRangeString(5, 100, true).parse(node!)).toEqual(
+      "pretend very long str"
+    );
+    expect(z.inRangeString().parse(node!)).toEqual("pretend very long str");
+    expect(z.inRangeString(50, 80).parse.bind(null, node!)).toThrow();
   });
 });

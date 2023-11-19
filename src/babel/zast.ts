@@ -25,16 +25,22 @@ export class Zast<
 
   custom<
     TName extends string,
-    TArgs,
+    TArgs extends unknown[],
     TVal
     // TBody extends (ctx: Context, node: Node, ...args: unknown[]) => unknown
   >(
     name: TName,
-    body: (ctx: Context, node: Node, ...args: TArgs[]) => TVal
-  ): asserts this is { [K in TName]: (...args: TArgs[]) => Parser<TVal> } {
+    body: (
+      ctx: Context,
+      node: Node,
+      ...args: [...{ [key in keyof TArgs]: TArgs[key] }]
+    ) => TVal
+  ): asserts this is { [K in TName]: (...args: TArgs) => Parser<TVal> } {
     const ctx = this.context;
 
-    (this as any)[name] = (...args: TArgs[]): Parser<TVal> => ({
+    (this as any)[name] = (
+      ...args: [...{ [key in keyof TArgs]: TArgs[key] }]
+    ): Parser<TVal> => ({
       parse(node) {
         return body(ctx, node, ...args);
       },

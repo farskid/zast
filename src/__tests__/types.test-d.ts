@@ -1,5 +1,8 @@
 import { expectTypeOf } from "vitest";
 import { getTestBabelInstance } from "../testUtils";
+import { isStringLiteral } from "@babel/types";
+import { Zast } from "../babel/zast";
+import { ZastContext } from "../babel/types";
 
 describe("z.", () => {
   const { z } = getTestBabelInstance("");
@@ -70,5 +73,40 @@ describe("z.", () => {
     //     }),
     //   ]).parse
     // ).returns.toEqualTypeOf<string>;
+  });
+  it("z.custom should infer correct args and return values based on the passed parser", () => {
+    const _z: Zast<ZastContext> = z;
+    _z.custom("minLenString", (ctx, node, len?: number) => {
+      if (
+        isStringLiteral(node) &&
+        len != undefined &&
+        node.value.length > len
+      ) {
+        return node.value;
+      }
+    });
+
+    expectTypeOf(_z.minLenString).parameters.toEqualTypeOf<[len?: number]>();
+    expectTypeOf(_z.minLenString().parse).returns.toEqualTypeOf<string>;
+  });
+  it("z.custom should infer correct args and return values based on the passed parser", () => {
+    const _z: Zast<ZastContext> = z;
+    _z.custom(
+      "inRangeString",
+      (
+        ctx,
+        node,
+        min: number = 0,
+        max: number = 50,
+        inclusive: boolean = false
+      ) => {
+        return isStringLiteral(node) ? node.value : undefined;
+      }
+    );
+
+    expectTypeOf(_z.inRangeString).parameters.toEqualTypeOf<
+      [min?: number, max?: number, inclusive?: boolean]
+    >();
+    expectTypeOf(_z.inRangeString().parse).returns.toEqualTypeOf<string>;
   });
 });
