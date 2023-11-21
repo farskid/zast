@@ -58,32 +58,32 @@ matches an **exact** object of shape:
 - `z.custom` allows creating ad-hoc parsers.
 
 ```ts
-const z: Zast = new Zast({
-  fileContent: 'const str = "pretend very long str"',
-});
-
-z.custom(
-  "inRangeString",
-  (
-    ctx,
-    node,
-    min: number = 0,
-    max: number = 50,
-    inclusive: boolean = false
-  ) => {
-    if (
-      t.isStringLiteral(node) &&
-      (inclusive ? node.value.length >= min : node.value.length > min) &&
-      (inclusive ? node.value.length <= max : node.value.length < max)
-    ) {
-      return node.value;
-    }
-    throw new ParseError(
+const z = Zast(
+  {
+    fileContent: 'const longStr = "pretend very long str"',
+  },
+  {
+    inRangeString: (
+      ctx,
       node,
-      `string does not have a length between ${min} and ${max}, ${
-        inclusive ? "inclusive" : "non-inclusive"
-      }`
-    );
+      min: number = 0,
+      max: number = 50,
+      inclusive: boolean = false
+    ) => {
+      if (
+        t.isStringLiteral(node) &&
+        (inclusive ? node.value.length >= min : node.value.length > min) &&
+        (inclusive ? node.value.length <= max : node.value.length < max)
+      ) {
+        return node.value;
+      }
+      throw new ParseError(
+        node,
+        `string does not have a length between ${min} and ${max}, ${
+          inclusive ? "inclusive" : "non-inclusive"
+        }`
+      );
+    },
   }
 );
 
