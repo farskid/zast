@@ -9,86 +9,116 @@ import { parseObject } from "./object";
 import { parseString } from "./string";
 import parseTuple from "./tuple";
 import { Parser, ZastContext } from "./types";
-import defaultUnionParser from "./union";
+import { parseUnion } from "./union";
 
-export class Zast<Context extends ZastContext = ZastContext> {
-  private context: Context;
-  constructor(context: Context) {
-    this.context = context;
-  }
+interface BaseParsers {
+  any(): Parser<any>;
+  string(value?: string): Parser<string>;
+  number(value?: number): Parser<number>;
+  boolean(value?: boolean): Parser<boolean>;
+  identifier(name?: string): Parser<string>;
+  function(name?: string): Parser<string | undefined>;
+  array<I>(itemsSchema?: Parser<I>): Parser<I[]>;
+  tuple<I extends Array<unknown>>(
+    itemsSchema?: [...{ [key in keyof I]: Parser<I[key]> }]
+  ): Parser<unknown>;
+  object<I extends Record<string, unknown>>(objSchema?: {
+    [key in keyof I]: Parser<I[key]>;
+  }): Parser<I>;
+  or<I extends unknown[]>(
+    membersSchema: [...{ [key in keyof I]: Parser<I[key]> }]
+  ): Parser<unknown>;
+}
 
-  custom<TName extends string, TArgs extends unknown[], TVal>(
-    name: TName,
-    body: (
-      ctx: Context,
-      node: Node,
-      ...args: [...{ [key in keyof TArgs]: TArgs[key] }]
-    ) => TVal
-  ): asserts this is { [K in TName]: (...args: TArgs) => Parser<TVal> } {
-    const ctx = this.context;
+type ParametersExceptFirstAndSecond<F> = F extends (
+  arg0: any,
+  arg1: any,
+  ...rest: infer R
+) => any
+  ? R
+  : never;
 
-    (this as any)[name] = (
-      ...args: [...{ [key in keyof TArgs]: TArgs[key] }]
-    ): Parser<TVal> => ({
+export function Zast<
+  TContext extends ZastContext,
+  TParsers extends Record<
+    string,
+    (ctx: TContext, node: Node, ...args: never[]) => unknown
+  >
+>(
+  context: TContext,
+  customParsers?: TParsers
+): BaseParsers & {
+  [K in keyof TParsers]: (
+    ...args: ParametersExceptFirstAndSecond<TParsers[K]>
+  ) => Parser<ReturnType<TParsers[K]>>;
+} {
+  const baseParsers = {
+    any() {
+      return parseAny(context);
+    },
+
+    string(value?: string) {
+      return parseString(context, value);
+    },
+
+    number(value?: number) {
+      return parseNumber(context, value);
+    },
+
+    boolean(value?: boolean) {
+      return parseBoolean(context, value);
+    },
+
+    identifier(name?: string): Parser<string> {
+      return parseIdentifier(context, { name });
+    },
+
+    function(name?: string): Parser<string | undefined> {
+      return parseFunction(context, { name });
+    },
+
+    array<I>(itemsSchema?: Parser<I>) {
+      return parseArray(context, { itemsSchema });
+    },
+
+    tuple<I extends Array<unknown>>(
+      itemsSchema?: [...{ [key in keyof I]: Parser<I[key]> }]
+    ) {
+      return parseTuple(context, { itemsSchema });
+    },
+
+    object<I extends Record<string, unknown>>(objSchema?: {
+      [key in keyof I]: Parser<I[key]>;
+    }) {
+      return parseObject(context, { objSchema });
+    },
+
+    or<I extends unknown[]>(
+      membersSchema: [...{ [key in keyof I]: Parser<I[key]> }]
+    ) {
+      return parseUnion(context, { membersSchema });
+    },
+  };
+
+  const customMethods = {} as {
+    [K in keyof TParsers]: (
+      ...args: ParametersExceptFirstAndSecond<TParsers[K]>
+    ) => Parser<ReturnType<TParsers[K]>>;
+  };
+  for (const name in customParsers) {
+    customMethods[name] = (
+      ...args: ParametersExceptFirstAndSecond<TParsers[string]>
+    ) => ({
       parse(node) {
-        return body(ctx, node, ...args);
+        return customParsers[name](context, node, ...args) as ReturnType<
+          TParsers[string]
+        >;
       },
     });
   }
 
-  any() {
-    const ctx = this.context;
-    return parseAny(ctx);
-  }
-
-  string(value?: string) {
-    const ctx = this.context;
-    return parseString(ctx, value);
-  }
-
-  number(value?: number) {
-    const ctx = this.context;
-    return parseNumber(ctx, value);
-  }
-
-  boolean(value?: boolean) {
-    const ctx = this.context;
-    return parseBoolean(ctx, value);
-  }
-
-  identifier(name?: string): Parser<string> {
-    const ctx = this.context;
-    return parseIdentifier(this.context, { name });
-  }
-
-  function(name?: string): Parser<string | undefined> {
-    const ctx = this.context;
-    return parseFunction(ctx, { name });
-  }
-
-  array<I>(itemsSchema?: Parser<I>) {
-    const ctx = this.context;
-    return parseArray(ctx, { itemsSchema });
-  }
-
-  tuple<I extends Array<unknown>>(
-    itemsSchema?: [...{ [key in keyof I]: Parser<I[key]> }]
-  ) {
-    const ctx = this.context;
-    return parseTuple(ctx, { itemsSchema });
-  }
-
-  object<I extends Record<string, unknown>>(objSchema?: {
-    [key in keyof I]: Parser<I[key]>;
-  }) {
-    const ctx = this.context;
-    return parseObject(ctx, { objSchema });
-  }
-
-  or<I extends unknown[]>(
-    membersSchema: [...{ [key in keyof I]: Parser<I[key]> }]
-  ) {
-    const ctx = this.context;
-    return defaultUnionParser(ctx, { membersSchema });
-  }
+  return {
+    ...baseParsers,
+    ...customMethods,
+  };
 }

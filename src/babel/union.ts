@@ -1,11 +1,7 @@
 import { Parser, ZastContext } from "./types";
 import { ParseError } from "./utils";
-import t from "@babel/types";
 
-export default function defaultUnionParser<
-  C extends ZastContext,
-  I extends Array<unknown>
->(
+export function parseUnion<C extends ZastContext, I extends Array<unknown>>(
   context: C,
   options: {
     membersSchema: [...{ [key in keyof I]: Parser<I[key]> }];
