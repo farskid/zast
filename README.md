@@ -9,7 +9,8 @@ Parses an AST node against a schema and returns the parsed value if schema parsi
 
 ## API
 
-### Babel AST
+Zast is class-base/d. You need to create an instance with an optional context before using any parsers.
+Each Zast instance ships with a fixed set of basic parsers of following list.
 
 - `z.string()` matches any string and returns its value
 - `z.string('John')` matches any string with exact value "John" and returns its value
@@ -51,7 +52,43 @@ matches an **exact** object of shape:
 - `z.function()` matches any function
 
 - `z.or(schema[])` matches if any of the schemas match, the first match wins
+
   - `z.or(z.string(), z.number()).parse(SringLiternalNode)` passes and returns the string value
+
+- `z.custom` allows creating ad-hoc parsers.
+
+```ts
+const z = Zast(
+  {
+    fileContent: 'const longStr = "pretend very long str"',
+  },
+  {
+    inRangeString: (
+      ctx,
+      node,
+      min: number = 0,
+      max: number = 50,
+      inclusive: boolean = false
+    ) => {
+      if (
+        t.isStringLiteral(node) &&
+        (inclusive ? node.value.length >= min : node.value.length > min) &&
+        (inclusive ? node.value.length <= max : node.value.length < max)
+      ) {
+        return node.value;
+      }
+      throw new ParseError(
+        node,
+        `string does not have a length between ${min} and ${max}, ${
+          inclusive ? "inclusive" : "non-inclusive"
+        }`
+      );
+    },
+  }
+);
+
+z.inRangeString(5, 100, true).parse(stringNode); // will pass and return the string value
+```
 
 ## Development
 

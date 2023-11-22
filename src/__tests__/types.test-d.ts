@@ -1,8 +1,11 @@
 import { expectTypeOf } from "vitest";
 import { getTestBabelInstance } from "../testUtils";
+import { isNumericLiteral, isStringLiteral } from "@babel/types";
+import { Zast } from "../babel/zast";
+import { ZastContext } from "../babel/types";
 
 describe("z.", () => {
-  const { z } = getTestBabelInstance("");
+  const { z } = getTestBabelInstance({ fileContent: "" });
   it("z.string() should pass a string output", () => {
     expectTypeOf(z.string().parse).returns.toBeString();
   });
@@ -70,5 +73,47 @@ describe("z.", () => {
     //     }),
     //   ]).parse
     // ).returns.toEqualTypeOf<string>;
+  });
+  it("z.custom should infer correct args and return values based on the passed parser", () => {
+    const z = Zast(
+      { fileContent: "" },
+      {
+        minLenString: (ctx, node, len: number = 10) => {
+          if (
+            isStringLiteral(node) &&
+            len != undefined &&
+            node.value.length > len
+          ) {
+            return node.value;
+          }
+        },
+      }
+    );
+
+    expectTypeOf(z.minLenString).parameters.toEqualTypeOf<[len?: number]>();
+    expectTypeOf(z.minLenString().parse).returns.toEqualTypeOf<string>;
+  });
+  it("z.custom should infer correct args and return values based on the passed parser", () => {
+    const z = Zast(
+      { fileContent: "" },
+      {
+        isInRangeNumber: (
+          ctx,
+          node,
+          min: number = 0,
+          max: number = 50,
+          inclusive: boolean = false
+        ) => {
+          return isNumericLiteral(node) && node.value;
+        },
+      }
+    );
+
+    expectTypeOf(z.isInRangeNumber).toEqualTypeOf<{ fileContent: string }>;
+
+    expectTypeOf(z.isInRangeNumber).parameters.toEqualTypeOf<
+      [min?: number, max?: number, inclusive?: boolean]
+    >();
+    expectTypeOf(z.isInRangeNumber().parse).returns.toEqualTypeOf<string>;
   });
 });

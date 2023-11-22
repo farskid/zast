@@ -10,8 +10,9 @@
   },
   "type": "module",
   "scripts": {
-    "test-types": "vitest run --typecheck.only",
-    "test": "vitest run"
+    "test:types": "vitest run --typecheck.only",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "exports": "./index.ts",
   "engines": {
